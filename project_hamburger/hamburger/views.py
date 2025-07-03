@@ -20,7 +20,8 @@ def homeView(request):
 
 
 def aboutView(request):
-    return render(request, "about.html")
+    data = AboutUs.objects.all()
+    return render(request, "about.html", {"data": data})
 
 
 def MenuView(request):
@@ -30,6 +31,24 @@ def MenuView(request):
 
 
 def bookTableView(request):
+    if request.method == "POST":
+        name = request.POST.get("user_name")
+        email = request.POST.get("user_email")
+        phone_number = request.POST.get("phone_number")
+        booking_date = request.POST.get("booking_data")
+        total_person = request.POST.get("total_person")
+        
+        if(name != "" and email != "" and phone_number != "" and booking_date != ""):
+            data = BookTable(
+                Name=name,
+                Email=email,
+                Phone=phone_number,
+                Booking_date=booking_date,
+                Total_persons=total_person,
+            )
+            print(data)
+            data.save()
+        
     return render(request, "book_table.html")
 
 
