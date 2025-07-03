@@ -1,12 +1,21 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
+from django.contrib.auth.views import LoginView as AuthLoginView
+from django.urls import reverse_lazy
+from django.contrib.auth.forms import UserCreationForm
 from .models import *
 
 
 # Create your views here.
-def logInView(request):
-    pass
+class logInView(AuthLoginView):
+    template_name = "login.html"
+    def get_success_url(self):
+        # Kiem tra xem user co phai admin khong
+        if self.request.user.is_staff:
+            return reverse_lazy("admin:index")
+        return reverse_lazy("home")
+
 
 
 def logOutView(request):
@@ -14,7 +23,19 @@ def logOutView(request):
     messages.success(request, "You have been logged out successfully.")
     return redirect("home")
     
-
+def SignUpView(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, f'Welcome, {user.username}!')
+            return redirect("home")
+        else:
+            messages.error(request, "Error during signup. Please try again.")
+    else:
+        form = UserCreationForm()
+        return render(request, "login.html", {"form": form, "tab": 'sigup'} )
 
 def homeView(request):
     list = ItemList.objects.all()
